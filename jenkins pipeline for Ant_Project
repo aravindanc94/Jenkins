@@ -1,0 +1,42 @@
+pipeline{
+    agent{
+        node 'dit'
+    }
+    stages{
+        stage('preflight check'){
+            steps{
+                echo 'checking docker'
+                sh 'docker -v'
+                echo 'checking git'
+                sh 'git --version'
+            }        
+        }
+        stage('cloning repo'){
+            steps{
+                sh 'echo \'pulling repo!\''
+                sh 'sudo git clone https://github.com/aravindanc94/ant-demo.git'
+            }
+        }
+        stage('building war file'){
+            steps{
+                sh 'sudo ant -f /home/dit-user/workspace/Ant_Project/ant-demo/'
+            }
+        }
+        stage('Testing Build'){
+            steps{
+                echo 'Testing Build'
+            }
+        }
+        stage('building Docker Images'){
+            steps{
+                echo 'docker build'
+                sh 'sudo docker build -t demo_project:v1 /home/dit-user/workspace/Ant_Project/ant-demo/'
+            }
+        }
+        stage('creating docker images'){
+            steps{
+                sh 'sudo docker run -d -p 8888:8080 demo_project:v1'
+            }
+        }                       
+    }   
+}
